@@ -18,40 +18,37 @@ Image.MAX_IMAGE_PIXELS = None
 
 # ##############################读取图片信息###################################
 # ##图片路径设置
-# in_ds = gdal.Open("F:/Date/东北黑土苗草数据/result_imgs/333.tif")
-# out_path = "D:/PythonProject/yolov5/crop_data_8"
-#
-# # 读取原图中的每个波段，通道数从1开始，默认前三波段
-# in_band1 = in_ds.GetRasterBand(1)
-# in_band2 = in_ds.GetRasterBand(2)
-# in_band3 = in_ds.GetRasterBand(3)
-#
-# # 获取原图的原点坐标信息
-# ori_transform = in_ds.GetGeoTransform()
-# top_left_x = ori_transform[0]  # 左上角x坐标
-# top_left_y = ori_transform[3]  # 左上角y坐标
-# w_e_pixel_resolution = ori_transform[1]  # 东西方向像素分辨率
-# n_s_pixel_resolution = ori_transform[5]  # 南北方向像素分辨率
-#
-# # 读取原图中的每个波段，通道数从1开始，默认前三波段
-# in_band1 = in_ds.GetRasterBand(1)
-# in_band2 = in_ds.GetRasterBand(2)
-# in_band3 = in_ds.GetRasterBand(3)
-#
-# # 获取原图的原点坐标信息
-# ori_transform = in_ds.GetGeoTransform()
-# top_left_x = ori_transform[0]  # 左上角x坐标
-# top_left_y = ori_transform[3]  # 左上角y坐标
-# w_e_pixel_resolution = ori_transform[1]  # 东西方向像素分辨率
-# n_s_pixel_resolution = ori_transform[5]  # 南北方向像素分辨率
+in_ds = gdal.Open("E:/result_imgs/crop/Cut out large image warehouse/cut_3.tif")
+out_path = "E:/result_imgs/crop/15m_scale/512"
+
+# 读取原图中的每个波段，通道数从1开始，默认前三波段
+in_band1 = in_ds.GetRasterBand(1)
+in_band2 = in_ds.GetRasterBand(2)
+in_band3 = in_ds.GetRasterBand(3)
+
+# 获取原图的原点坐标信息
+ori_transform = in_ds.GetGeoTransform()
+top_left_x = ori_transform[0]  # 左上角x坐标
+top_left_y = ori_transform[3]  # 左上角y坐标
+w_e_pixel_resolution = ori_transform[1]  # 东西方向像素分辨率
+n_s_pixel_resolution = ori_transform[5]  # 南北方向像素分辨率
+
+# 读取原图中的每个波段，通道数从1开始，默认前三波段
+in_band1 = in_ds.GetRasterBand(1)
+in_band2 = in_ds.GetRasterBand(2)
+in_band3 = in_ds.GetRasterBand(3)
+
+# 获取原图的原点坐标信息
+ori_transform = in_ds.GetGeoTransform()
+top_left_x = ori_transform[0]  # 左上角x坐标
+top_left_y = ori_transform[3]  # 左上角y坐标
+w_e_pixel_resolution = ori_transform[1]  # 东西方向像素分辨率
+n_s_pixel_resolution = ori_transform[5]  # 南北方向像素分辨率
 
 # 要裁剪图像的大小
-img_w = 256*5
-img_h = 256*5
-crop = [img_w, img_h]
-cropsize = 400
-cropsize_w = 91
-cropsize_h = 37
+img_w = 256*4
+img_h = 256*4
+cropsize = 512
 
 
 # 读取路径下图片的名称
@@ -65,8 +62,7 @@ def file_name(dir_path):
     return L
 
 
-# image_sets = file_name('D:/Data Set/东农')  # 图片存贮路径
-image_sets = ['E:/2023070720m.tif']
+image_sets = file_name('E:/result_imgs/crop/Cut out large image warehouse')  # 图片存贮路径
 
 
 # 添加噪声
@@ -175,27 +171,27 @@ def crop_img(img, cropsize, overlap):
 
 
 # 滑动创建区域数据集
-def creat_dataset(overlap=0.00):
+def creat_dataset(overlap=0.15):
     print('creating dataset...')
+    num = 0
     for i in tqdm(range(len(image_sets))):
-        num = 0
+        # num = 144
         src_img = Image.open(image_sets[i])  # 3 channels
         width, height = src_img.size[:2]
         arrSlope = []  # 用于存储每个小区域的（X, Y, W=H）坐标
-        ranks_area = [[int(height / (cropsize_h * (1 - overlap))),
-                       int(width / (cropsize_w * (1 - overlap)))]]  # 用于存取每个区域列数行数 [0]存储总行数列数
+        ranks_area = [[int(height / (cropsize * (1 - overlap))),
+                       int(width / (cropsize * (1 - overlap)))]]  # 用于存取每个区域列数行数 [0]存储总行数列数
 
         # 对图像进行裁剪，这里大小为1024*1024
         # 从左上开始裁剪
-        for i in range(int((height / (cropsize_h * (1 - overlap))))):  # 行裁剪次数
-            for j in range(int((width / (cropsize_w * (1 - overlap))))):  # 列裁剪次数
+        for i in range(int((height / (cropsize * (1 - overlap))))):  # 行裁剪次数
+            for j in range(int((width / (cropsize * (1 - overlap))))):  # 列裁剪次数
                 # max函数是为了防止i，j为0时索引为负数
-                cropped = src_img.crop((int(j * cropsize_w * (1 - overlap)), int(i * cropsize_h * (1 - overlap)),
-                                        int(j * cropsize_w * (1 - overlap) + cropsize_w),
-                                        int(i * cropsize_h * (1 - overlap) + cropsize_h)))
+                cropped = src_img.crop((int(j * cropsize * (1 - overlap)), int(i * cropsize * (1 - overlap)),
+                                        int(j * cropsize * (1 - overlap) + cropsize),
+                                        int(i * cropsize * (1 - overlap) + cropsize)))
                 num = num + 1
-                arrSlope.append([int(j * cropsize_w * (1 - overlap)), int(i * cropsize_h * (1 - overlap)), cropsize_w,
-                                 cropsize_h])
+                arrSlope.append([int(j * cropsize * (1 - overlap)), int(i * cropsize * (1 - overlap)), cropsize])
                 ranks_area.append([i, j])
                 #########
                 # out_band1 = in_band1.ReadAsArray(int(j * cropsize * (1 - overlap)), int(i * cropsize * (1 - overlap)),
@@ -229,28 +225,28 @@ def creat_dataset(overlap=0.00):
                 # out_ds.FlushCache()
                 # print(f"FlushCache succeed{num}")
                 # del out_ds
-                cropped.save('E:/20m/%d.png' % num)
+                cropped.save(out_path + '/%d.jpg' % num)
 
         #  向前裁剪最后的列
-        # for i in range(int(height / (cropsize_h * (1 - overlap)))):
-        #     cropped = src_img.crop((width - cropsize_w, int(i * cropsize_h * (1 - overlap)),
-        #                             width, int(i * cropsize_h * (1 - overlap) + cropsize_h)))
+        # for i in range(int(height / (cropsize * (1 - overlap)))):
+        #     cropped = src_img.crop((width - cropsize, int(i * cropsize * (1 - overlap)),
+        #                             width, int(i * cropsize * (1 - overlap) + cropsize)))
         #     num = num + 1
-        #     arrSlope.append([width - cropsize_w, int(i * cropsize_h * (1 - overlap)), cropsize_w, cropsize_h])
-        #     cropped.save('E:/crop_data_10m/%d.png' % num)
-
-        # 向前裁剪最后的行
+        #     arrSlope.append([width - cropsize, int(i * cropsize * (1 - overlap)), cropsize])
+        #     cropped.save('F:/result_imgs/crop/8.04/768/tif/%d.tif' % num)
+        #
+        # # 向前裁剪最后的行
         # for j in range(int(width / (cropsize * (1 - overlap)))):
-        #     cropped = src_img.crop((int(j * cropsize_w * (1 - overlap)), height - cropsize_h,
-        #                             int(j * cropsize_w * (1 - overlap) + cropsize_w), height))
+        #     cropped = src_img.crop((int(j * cropsize * (1 - overlap)), height - cropsize,
+        #                             int(j * cropsize * (1 - overlap) + cropsize), height))
         #     num = num + 1
-        #     arrSlope.append([int(j * cropsize_w * (1 - overlap)), height - cropsize_h, cropsize_w, cropsize_h])
-        #     cropped.save('E:/crop_data_10m/%d.png' % num)
+        #     arrSlope.append([int(j * cropsize * (1 - overlap)), height - cropsize, cropsize])
+        #     cropped.save('F:/result_imgs/crop/8.04/768/tif/%d.tif' % num)
 
         np.array(arrSlope, dtype=int)
         # cropped.save('crop_data_15/%d.tif' % num)
         # np.savetxt("area_axis.txt", arrSlope)  # 保存文件
-        return arrSlope, ranks_area, [width, height]
+        return arrSlope, ranks_area
 
         # if mode == 'augment':
         #     src_roi, label_roi = data_augment(src_roi, label_roi)
