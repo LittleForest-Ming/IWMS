@@ -87,7 +87,7 @@ def calc_iou(box1, box2):
     return iou
 
 
-def merge_boxes_1(box1, box2):
+def merge_boxes(box1, box2):
     """
     Merges two boxes into one.
 
@@ -108,63 +108,18 @@ def merge_boxes_1(box1, box2):
     return merged_box
 
 
-# better
-def compute_iou(box1, box2):
-    x1, y1, x2, y2 = box1
-    x1_b, y1_b, x2_b, y2_b = box2
+# Sample data
+boxes = [(100, 100, 200, 200),
+         (100, 100, 250, 250),
+         (300, 300, 400, 400),
+         (320, 320, 420, 420),
+         (50, 50, 150, 150)]
 
-    inter_x1 = max(x1, x1_b)
-    inter_y1 = max(y1, y1_b)
-    inter_x2 = min(x2, x2_b)
-    inter_y2 = min(y2, y2_b)
-
-    intersection = max(0, inter_x2 - inter_x1) * max(0, inter_y2 - inter_y1)
-    area_box1 = (x2 - x1) * (y2 - y1)
-    area_box2 = (x2_b - x1_b) * (y2_b - y1_b)
-
-    union = area_box1 + area_box2 - intersection
-
-    return intersection / union
+# Merge boxes with IoU threshold of 0.5
+merged_boxes = set(merge_iou_boxes(boxes, 0.2))
 
 
-def merge_boxes(detections, iou_threshold=0.5):
-    results = []
-    detections = sorted(detections, key=lambda x: x[0])
-
-    while len(detections) > 0:
-        current_class, current_box = detections.pop(0)
-        if current_class == 0:
-            continue
-
-        to_merge = [current_box]
-        for i, (other_class, other_box) in enumerate(detections):
-            if current_class == other_class and compute_iou(current_box, other_box) > iou_threshold:
-                to_merge.append(other_box)
-                del detections[i]
-
-        merged_box = (
-            min(box[0] for box in to_merge),
-            min(box[1] for box in to_merge),
-            max(box[2] for box in to_merge),
-            max(box[3] for box in to_merge),
-        )
-        results.append((current_class, *merged_box))
-
-    return results
-
-
-if __name__ == '__main__':
-    # A simple test
-    detections = [
-        (1, 10, 10, 50, 50),
-        (1, 20, 20, 60, 60),
-        (2, 70, 70, 110, 110),
-        (2, 80, 80, 120, 120),
-        (3, 130, 130, 170, 170),
-        (0, 140, 140, 180, 180),
-    ]
-
-    merged_detections = merge_boxes(detections, iou_threshold=0.45)
-    print(merged_detections)
-
+# Print the merged boxes
+for box in merged_boxes:
+    print(box)
 
